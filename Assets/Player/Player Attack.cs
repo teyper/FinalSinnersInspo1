@@ -21,9 +21,16 @@ public class PlayerAttack : MonoBehaviour
     IEnumerator PerformAttack()
     {
         GetComponent<Animator>().SetTrigger("attack"); // Trigger animation
-        if (guitarAudio != null) guitarAudio.Play();
+        //if (guitarAudio != null) guitarAudio.Play();
         weapon.StartAttack();
         yield return new WaitForSeconds(attackDuration);
         weapon.StopAttack();
+    }
+    public void PlayGuitarSound()
+    {
+        if (guitarAudio != null)
+        {
+            guitarAudio.Play();
+        }
     }
 }

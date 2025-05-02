@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private Transform player;
@@ -13,9 +12,12 @@ public class Enemy : MonoBehaviour
     private Animator animator;
     private bool isAlive = true;
 
+    private Vector3 lastPosition;
+
     void Start()
     {
         animator = GetComponent<Animator>();
+        lastPosition = transform.position;
     }
 
     void Update()
@@ -23,22 +25,26 @@ public class Enemy : MonoBehaviour
         if (!isAlive) return;
 
         float distance = Vector3.Distance(transform.position, player.position);
-        float moveSpeed = 0f;
+        float currentSpeed = 0f;
 
         if (distance < chaseRange)
         {
-            // Look at the player horizontally
+            // Rotate to face the player (horizontal only)
             Vector3 lookAt = new Vector3(player.position.x, transform.position.y, player.position.z);
             transform.LookAt(lookAt);
 
             if (distance > attackRange)
             {
-                moveSpeed = speed;
-                transform.Translate(Vector3.forward * speed * Time.deltaTime);
+                // Move toward player smoothly
+                Vector3 direction = (player.position - transform.position).normalized;
+                direction.y = 0f; // prevent floating
+                transform.position += direction * speed * Time.deltaTime;
+
+                currentSpeed = speed;
             }
 
             // Animation parameters
-            animator.SetFloat("Speed", moveSpeed);
+            animator.SetFloat("Speed", currentSpeed); // must match Blend Tree param name
             animator.SetBool("InRange", distance <= attackRange);
         }
         else
@@ -47,6 +53,8 @@ public class Enemy : MonoBehaviour
             animator.SetFloat("Speed", 0f);
             animator.SetBool("InRange", false);
         }
+
+        lastPosition = transform.position;
     }
 
     public void Kill()
@@ -54,7 +62,8 @@ public class Enemy : MonoBehaviour
         if (!isAlive) return;
 
         isAlive = false;
-        animator.SetTrigger("Die"); // Optional: if you have a death anim
-        Destroy(gameObject, 2f);    // Let the animation play before destroying
+        animator.SetTrigger("Die");
+        Destroy(gameObject, 2f);
     }
 }
+

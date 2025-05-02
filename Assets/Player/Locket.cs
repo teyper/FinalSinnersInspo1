@@ -16,7 +16,7 @@ public class LocketPickup : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             Debug.Log("Player picked up the locket. Loading Scene 1...");
-            SceneManager.LoadScene(0); // Or LoadScene("Scene1")
+            SceneManager.LoadScene(1); // Or LoadScene("Scene1")
         }
     }
 }
