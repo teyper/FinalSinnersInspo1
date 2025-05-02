@@ -1,9 +1,10 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LocketPickup : MonoBehaviour
+public class Locket : MonoBehaviour
 {
     public float rotationSpeed = 30f; // degrees per second
+    private bool triggered = false;
 
     void Update()
     {
@@ -13,10 +14,27 @@ public class LocketPickup : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (triggered) return;
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Player picked up the locket. Loading Scene 1...");
-            SceneManager.LoadScene(1); // Or LoadScene("Scene1")
+            triggered = true;
+
+            Debug.Log("Player picked up the locket. Showing mission complete...");
+
+            // Show mission complete message
+            GameManager gm = FindObjectOfType<GameManager>();
+            if (gm != null)
+            {
+                gm.ShowMissionComplete();
+            }
+
+            // Load splash screen after a short delay
+            Invoke("LoadSplashScene", 2f);
         }
+    }
+
+    void LoadSplashScene()
+    {
+        SceneManager.LoadScene(0); // Use your actual splash scene name or index
     }
 }
