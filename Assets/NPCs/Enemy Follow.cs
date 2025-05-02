@@ -10,7 +10,9 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float chaseRange = 10f;
 
     private Animator animator;
+    private AudioSource hissAudio;
     private bool isAlive = true;
+    private bool hasHissed = false;
 
     private Vector3 lastPosition;
 
@@ -18,6 +20,7 @@ public class Enemy : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         lastPosition = transform.position;
+        hissAudio = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -29,29 +32,36 @@ public class Enemy : MonoBehaviour
 
         if (distance < chaseRange)
         {
-            // Rotate to face the player (horizontal only)
+            // Play hiss once when player enters chase range
+            if (!hasHissed)
+            {
+                if (hissAudio != null && !hissAudio.isPlaying)
+                {
+                    hissAudio.Play();
+                    hasHissed = true;
+                }
+            }
+
+            // Rotate to face the player
             Vector3 lookAt = new Vector3(player.position.x, transform.position.y, player.position.z);
             transform.LookAt(lookAt);
 
             if (distance > attackRange)
             {
-                // Move toward player smoothly
                 Vector3 direction = (player.position - transform.position).normalized;
-                direction.y = 0f; // prevent floating
+                direction.y = 0f;
                 transform.position += direction * speed * Time.deltaTime;
-
                 currentSpeed = speed;
             }
 
-            // Animation parameters
-            animator.SetFloat("Speed", currentSpeed); // must match Blend Tree param name
+            animator.SetFloat("Speed", currentSpeed);
             animator.SetBool("InRange", distance <= attackRange);
         }
         else
         {
-            // Out of chase range
             animator.SetFloat("Speed", 0f);
             animator.SetBool("InRange", false);
+            hasHissed = false; // Reset so it can hiss again next time player re-enters
         }
 
         lastPosition = transform.position;
@@ -63,7 +73,16 @@ public class Enemy : MonoBehaviour
 
         isAlive = false;
         animator.SetTrigger("Die");
+
+        // Add points
+        GameManager gm = FindObjectOfType<GameManager>();
+        if (gm != null)
+        {
+            gm.AddPoints(1); // or more if needed
+        }
+
         Destroy(gameObject, 2f);
     }
+
 }
 
