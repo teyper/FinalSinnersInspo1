@@ -3,15 +3,15 @@ using UnityEngine.Playables;
 
 public class TimelineTrigger : MonoBehaviour
 {
-    public PlayableDirector entranceTimeline;
-    private bool hasPlayed = false;
+    public PlayableDirector director;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!hasPlayed && other.CompareTag("Player"))
+        if (other.CompareTag("Player") && director != null)
         {
-            hasPlayed = true;
-            entranceTimeline.Play();
+            director.Play();
+            gameObject.SetActive(false); // optional: disables trigger after use
         }
     }
 }
+
